@@ -28,14 +28,22 @@ namespace AstralAutoPatch
   {
     // 프로그램 실행 파일이 저장된 리포지토리
     public const string AppRepoOwner = "maynut02";
-    public const string AppRepoName = "AppRepo";
+    public const string AppRepoName = "AstralAutoPatch";
 
     // 한글 패치 파일이 저장된 리포지토리
     public const string PatchRepoOwner = "maynut02";
     public const string PatchRepoName = "AstralParty-KoPatch";
 
     // 현재 프로그램 버전
-    public const string CurrentVersion = "v1.0.0";
+    public static string CurrentVersion 
+    {
+        get
+        {
+            var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            // v1.0.0 형식으로 반환
+            return v != null ? $"v{v.Major}.{v.Minor}.{v.Build}" : "v1.0.0";
+        }
+    }
 
     private static readonly HttpClient _client = new HttpClient();
 

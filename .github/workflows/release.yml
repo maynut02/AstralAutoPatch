@@ -25,8 +25,14 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    - name: Extract Version
+      shell: pwsh
+      run: |
+        $version = $env:GITHUB_REF_NAME.TrimStart('v')
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+
     - name: Publish
-      run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish
+      run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:Version=${{ env.VERSION }} -o ./publish
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
