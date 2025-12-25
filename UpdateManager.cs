@@ -95,7 +95,7 @@ namespace AstralAutoPatch
       }
     }
 
-    public static async Task SelfUpdateAsync(GitHubRelease release)
+    public static async Task SelfUpdateAsync(GitHubRelease release, IProgress<int> progress)
     {
       // 현재 실행 중인 파일의 경로를 가져옴
       var currentExe = Process.GetCurrentProcess().MainModule?.FileName;
@@ -110,7 +110,7 @@ namespace AstralAutoPatch
       var tempPath = currentExe + ".new";
 
       // 다운로드
-      await DownloadFileAsync(asset.BrowserDownloadUrl, tempPath, new Progress<int>());
+      await DownloadFileAsync(asset.BrowserDownloadUrl, tempPath, progress);
 
       // 배치 파일을 생성하여 교체 및 재시작 수행
       var batchPath = Path.Combine(Path.GetDirectoryName(currentExe)!, "update.bat");

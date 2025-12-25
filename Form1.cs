@@ -20,6 +20,7 @@ namespace AstralAutoPatch
     public Form1()
     {
       InitializeComponent();
+      lstLog.HorizontalScrollbar = true;
       this.Shown += Form1_Shown;
     }
 
@@ -114,8 +115,17 @@ namespace AstralAutoPatch
         if (latestAppRelease != null && UpdateManager.IsNewerVersion(UpdateManager.CurrentVersion, latestAppRelease.TagName))
         {
           UpdateStatus("프로그램의 새 버전을 발견했습니다! 업데이트를 진행합니다...");
+          
+          var progress = new Progress<int>(percent =>
+          {
+            if (progressBar1.InvokeRequired)
+              progressBar1.Invoke(new Action(() => progressBar1.Value = percent));
+            else
+              progressBar1.Value = percent;
+          });
+
           // .exe 파일을 다운로드하여 교체
-          await UpdateManager.SelfUpdateAsync(latestAppRelease);
+          await UpdateManager.SelfUpdateAsync(latestAppRelease, progress);
           return;
         }
 
