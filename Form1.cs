@@ -12,7 +12,7 @@ namespace AstralAutoPatch
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool IsProtocolLaunch { get; set; } = false;
 
-    // URL을 통해 전달받을 수 있는 게임 데이터 폴더명 (기본값: 8vJXnINT)
+    // URL을 통해 전달받을 수 있는 게임 데이터 폴더명 (기본값 8vJXnINT)
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string TargetGameDataFolder { get; set; } = "8vJXnINT";
 
@@ -27,7 +27,7 @@ namespace AstralAutoPatch
     {
       try
       {
-        // UI가 완전히 그려질 시간을 줍니다.
+        // UI 딜레이
         await Task.Delay(100);
 
         // 0. 게임 설치 경로 확인
@@ -49,7 +49,7 @@ namespace AstralAutoPatch
           // 경로를 정규화한 후 비교
           if (currentDir != null && !string.Equals(Path.GetFullPath(currentDir).TrimEnd('\\'), Path.GetFullPath(installPath).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
           {
-            UpdateStatus("게임 폴더로 이동하는 중입니다...");
+            UpdateStatus("게임 설치 폴더로 이동하는 중입니다...");
             AddLog($"현재 위치: {currentDir}");
             AddLog($"이동할 위치: {installPath}");
 
@@ -81,7 +81,7 @@ namespace AstralAutoPatch
             }
             catch (Exception ex)
             {
-              MessageBox.Show($"이동 실패: {ex.Message}\n관리자 권한이 필요할 수 있습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+              MessageBox.Show($"이동 실패: {ex.Message}\n관리자 권한이 필요합니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
               Application.Exit();
               return;
             }
@@ -109,18 +109,18 @@ namespace AstralAutoPatch
         }
 
         // 2. 현재 프로그램의 버전과 깃허브의 최신 태그를 비교
-        UpdateStatus("프로그램 업데이트를 확인 중입니다...");
+        UpdateStatus("프로그램 버전을 확인 중입니다...");
         var latestAppRelease = await UpdateManager.GetLatestReleaseAsync(UpdateManager.AppRepoOwner, UpdateManager.AppRepoName);
         if (latestAppRelease != null && UpdateManager.IsNewerVersion(UpdateManager.CurrentVersion, latestAppRelease.TagName))
         {
-          UpdateStatus("새 버전을 발견했습니다! 업데이트를 진행합니다...");
+          UpdateStatus("프로그램의 새 버전을 발견했습니다! 업데이트를 진행합니다...");
           // .exe 파일을 다운로드하여 교체
           await UpdateManager.SelfUpdateAsync(latestAppRelease);
           return;
         }
 
         // 3. 게임 폴더 내의 version.txt 내용과 깃허브의 최신 태그를 비교
-        UpdateStatus("패치 버전을 확인 중입니다...");
+        UpdateStatus("한글패치 버전을 확인 중입니다...");
         var latestPatchRelease = await UpdateManager.GetLatestReleaseAsync(UpdateManager.PatchRepoOwner, UpdateManager.PatchRepoName);
         await CheckAndPatchGameAsync(installPath, latestPatchRelease);
 
@@ -205,7 +205,7 @@ namespace AstralAutoPatch
               var sourceFolder1 = Path.Combine(rootPath, "AstralParty_INT_Data");
               if (Directory.Exists(sourceFolder1))
               {
-                AddLog($"AstralParty_INT_Data를 복사하는 중입니다: {TargetGameDataFolder}");
+                AddLog($"AstralParty_INT_Data를 복사하는 중입니다: {sourceFolder1}");
                 var destFolder = Path.Combine(installPath, TargetGameDataFolder, "AstralParty_INT_Data");
                 CopyDirectory(sourceFolder1, destFolder, true);
               }
