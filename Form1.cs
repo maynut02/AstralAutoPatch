@@ -124,8 +124,15 @@ namespace AstralAutoPatch
               progressBar1.Value = percent;
           });
 
+          // 재시작 시 전달할 인자 구성
+          string restartArgs = "";
+          if (IsProtocolLaunch)
+          {
+             restartArgs = $"astral://{TargetGameDataFolder}";
+          }
+
           // .exe 파일을 다운로드하여 교체
-          await UpdateManager.SelfUpdateAsync(latestAppRelease, progress);
+          await UpdateManager.SelfUpdateAsync(latestAppRelease, progress, restartArgs);
           return;
         }
 

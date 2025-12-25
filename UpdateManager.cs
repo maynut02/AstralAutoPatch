@@ -95,7 +95,7 @@ namespace AstralAutoPatch
       }
     }
 
-    public static async Task SelfUpdateAsync(GitHubRelease release, IProgress<int> progress)
+    public static async Task SelfUpdateAsync(GitHubRelease release, IProgress<int> progress, string restartArguments = "")
     {
       // 현재 실행 중인 파일의 경로를 가져옴
       var currentExe = Process.GetCurrentProcess().MainModule?.FileName;
@@ -119,7 +119,7 @@ namespace AstralAutoPatch
 timeout /t 1 /nobreak > NUL
 del ""{currentExe}""
 move ""{tempPath}"" ""{currentExe}""
-start """" ""{currentExe}""
+start """" ""{currentExe}"" {restartArguments}
 del ""%~f0""
 ";
       await File.WriteAllTextAsync(batchPath, batchContent);
