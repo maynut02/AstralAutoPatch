@@ -153,26 +153,45 @@ namespace AstralAutoPatch
     {
       if (release == null) return;
 
-      // 로컬 버전을 확인
-      var versionFilePath = Path.Combine(installPath, "version.txt");
-      string localVersion = "";
+      // 로컬 버전을 확인 (Client)
+      var clientVersionFilePath = Path.Combine(installPath, "version.txt");
+      
+      // 로컬 버전을 확인 (Server - AppData/feimo)
+      var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+      var feimoPath = Path.Combine(userProfile, "AppData", "LocalLow", "feimo");
+      var serverVersionFilePath = Path.Combine(feimoPath, "version.txt");
+
+      string clientVersion = "";
+      string serverVersion = "";
       bool isNewInstall = false;
 
-      if (File.Exists(versionFilePath))
+      if (File.Exists(clientVersionFilePath))
       {
-        localVersion = await File.ReadAllTextAsync(versionFilePath);
-        AddLog($"설치된 한글패치 버전: {localVersion}");
+        clientVersion = await File.ReadAllTextAsync(clientVersionFilePath);
       }
-      else
+      
+      if (File.Exists(serverVersionFilePath))
+      {
+        serverVersion = await File.ReadAllTextAsync(serverVersionFilePath);
+      }
+
+      if (string.IsNullOrWhiteSpace(clientVersion) && string.IsNullOrWhiteSpace(serverVersion))
       {
         isNewInstall = true;
         AddLog("설치된 한글패치가 없습니다.");
       }
+      else
+      {
+        AddLog($"설치된 한글패치 버전 (Client): {clientVersion}");
+        AddLog($"설치된 한글패치 버전 (Server): {serverVersion}");
+      }
 
       AddLog($"최신 한글패치 버전: {release.TagName}");
 
-      // 버전을 비교
-      if (isNewInstall || UpdateManager.IsNewerVersion(localVersion, release.TagName))
+      // 버전을 비교 (둘 중 하나라도 구버전이거나 없으면 업데이트)
+      if (isNewInstall || 
+          UpdateManager.IsNewerVersion(clientVersion, release.TagName) || 
+          UpdateManager.IsNewerVersion(serverVersion, release.TagName))
       {
         UpdateStatus("한글패치 파일을 다운로드 중입니다...");
 
@@ -235,8 +254,7 @@ namespace AstralAutoPatch
               var sourceFolder2 = Path.Combine(rootPath, "AstralParty_INT");
               if (Directory.Exists(sourceFolder2))
               {
-                var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                var targetPath2 = Path.Combine(userProfile, "AppData", "LocalLow", "feimo", "AstralParty_INT");
+                var targetPath2 = Path.Combine(feimoPath, "AstralParty_INT");
 
                 // 대상 폴더가 없으면 상위 폴더까지 생성
                 Directory.CreateDirectory(targetPath2);
@@ -251,14 +269,20 @@ namespace AstralAutoPatch
 
               // 3. version.txt 덮어쓰기
               var sourceVersionFile = Path.Combine(rootPath, "version.txt");
+              
+              // feimo 폴더 생성 확인
+              if (!Directory.Exists(feimoPath)) Directory.CreateDirectory(feimoPath);
+
               if (File.Exists(sourceVersionFile))
               {
-                File.Copy(sourceVersionFile, versionFilePath, true);
+                File.Copy(sourceVersionFile, clientVersionFilePath, true);
+                File.Copy(sourceVersionFile, serverVersionFilePath, true);
               }
               else
               {
                 // zip 안에 version.txt가 없으면 태그 이름으로 생성
-                File.WriteAllText(versionFilePath, release.TagName);
+                File.WriteAllText(clientVersionFilePath, release.TagName);
+                File.WriteAllText(serverVersionFilePath, release.TagName);
                 AddLog("version.txt 생성 완료");
               }
 
